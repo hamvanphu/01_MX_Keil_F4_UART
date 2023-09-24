@@ -21,7 +21,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,7 +57,19 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void phu_printf(char *format,...) 
+{
+    char str[80];
 
+    /*Extract the the argument list using VA apis */
+    va_list args;
+    va_start(args, format);
+    vsprintf(str, format,args);
+	
+		/*Choose huartX - the uart port which you want to log out */
+    HAL_UART_Transmit(&huart2,(uint8_t *)str, strlen(str),HAL_MAX_DELAY);
+    va_end(args);
+}
 /* USER CODE END 0 */
 
 /**
@@ -102,6 +113,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		phu_printf("Phu check print by using UART2 PA2_TX - PA3_RX STM32F411 Discovery Board\r\n");
+		HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
