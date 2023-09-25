@@ -44,6 +44,10 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint8_t rx_data = 0;
+uint8_t flag_Uart_Comm = 0;
+uint8_t rx_frame[10];
+uint8_t rx_index = 0;
+uint8_t string_compare[10]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; // temp
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,12 +77,65 @@ void phu_printf(char *format,...)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  if(huart == &huart1)
+  {
+    HAL_UART_Receive_IT(&huart1, &rx_data, 1);// Register to recieve data at the next interupt time
+    if(rx_data == COMM_CODE_START)
+    {
+      if(rx_index == 0)
+      {
+        flag_Uart_Comm = 1; //start communication
+				memset(rx_frame, 0x00, 10); // Clear RX buffer
+      }
+      else
+      {
+        // return; //early return if the first data is not as discuss: 0x2A
+      }
+    }
+
+    if(flag_Uart_Comm == 1)
+    {
+      rx_frame[rx_index] = rx_data;
+      rx_index++;
+			
+      if(rx_index > (COMM_FRAME_MAX - 1)) // End of communication
+      {
+        rx_index = 0;
+        flag_Uart_Comm = 0;
+      }
+    }
+    else
+    {
+      return;
+    }
+  }
+}
+
+/**
+  * @brief  Compares two buffers.
+  * @param  pBuffer1, pBuffer2: buffers to be compared.
+  * @param  BufferLength: buffer's length
+  * @retval 0  : pBuffer1 identical to pBuffer2
+  *         >0 : pBuffer1 differs from pBuffer2
+  */
+static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
+{
+  while (BufferLength--)
+  {
+    if ((*pBuffer1) != *pBuffer2)
+    {
+      return BufferLength;
+    }
+    pBuffer1++;
+    pBuffer2++;
+  }
+
+  return 0;
 }
 
 void Led_Control_Handler(void)
 {
-  if(rx_data == 1)
+  if(Buffercmp(rx_frame, string_compare, COMM_FRAME_MAX) == 0)
   {
     //Led application turn-on here
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_SET);
@@ -124,7 +181,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
-  
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -137,6 +194,7 @@ int main(void)
 		// phu_printf("Phu check print by using UART2 PA2_TX - PA3_RX STM32F411 Discovery Board\r\n");
 		// HAL_Delay(1000);
     Led_Control_Handler();
+
   }
   /* USER CODE END 3 */
 }

@@ -63,6 +63,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
+#define COMM_FRAME_MAX        10
+#define COMM_CODE_START       0x2A // '*' character
 
 /* USER CODE END Private defines */
 
