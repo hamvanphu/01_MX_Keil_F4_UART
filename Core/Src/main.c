@@ -43,7 +43,7 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t rx_data = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,17 +59,37 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN 0 */
 void phu_printf(char *format,...) 
 {
-    char str[80];
+  char str[80];
 
-    /*Extract the the argument list using VA apis */
-    va_list args;
-    va_start(args, format);
-    vsprintf(str, format,args);
-	
-		/*Choose huartX - the uart port which you want to log out */
-    HAL_UART_Transmit(&huart2,(uint8_t *)str, strlen(str),HAL_MAX_DELAY);
-    va_end(args);
+  /*Extract the the argument list using VA apis */
+  va_list args;
+  va_start(args, format);
+  vsprintf(str, format,args);
+
+  /*Choose huartX - the uart port which you want to log out */
+  HAL_UART_Transmit(&huart2,(uint8_t *)str, strlen(str),HAL_MAX_DELAY);
+  va_end(args);
 }
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+}
+
+void Led_Control_Handler(void)
+{
+  if(rx_data == 1)
+  {
+    //Led application turn-on here
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_SET);
+  }
+  else
+  {
+    //Led application turn-off here
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+  }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -103,7 +123,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,8 +134,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		phu_printf("Phu check print by using UART2 PA2_TX - PA3_RX STM32F411 Discovery Board\r\n");
-		HAL_Delay(1000);
+		// phu_printf("Phu check print by using UART2 PA2_TX - PA3_RX STM32F411 Discovery Board\r\n");
+		// HAL_Delay(1000);
+    Led_Control_Handler();
   }
   /* USER CODE END 3 */
 }
