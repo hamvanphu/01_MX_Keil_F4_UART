@@ -45,9 +45,9 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 uint8_t rx_data = 0;
 uint8_t flag_Uart_Comm = 0;
-uint8_t rx_frame[10];
+uint8_t rx_frame[COMM_FRAME_MAX];
 uint8_t rx_index = 0;
-uint8_t string_compare[10]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; // temp
+uint8_t string_compare[COMM_FRAME_MAX]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; // temp
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,7 +85,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       if(rx_index == 0)
       {
         flag_Uart_Comm = 1; //start communication
-				memset(rx_frame, 0x00, 10); // Clear RX buffer
+				memset(rx_frame, 0x00, COMM_FRAME_MAX*(sizeof(rx_frame)/sizeof(uint8_t))); // Clear RX buffer
       }
       else
       {
@@ -194,6 +194,11 @@ int main(void)
 		// phu_printf("Phu check print by using UART2 PA2_TX - PA3_RX STM32F411 Discovery Board\r\n");
 		// HAL_Delay(1000);
     Led_Control_Handler();
+    HAL_Delay(1000);
+    phu_printf("Phu check sizeof(rx_frame)=%d\r\n", sizeof(rx_frame));
+    phu_printf("Phu check so phan tu =%d\r\n", sizeof(rx_frame)/sizeof(uint8_t));
+    phu_printf("Phu check sizeof(a)=%d\r\n", sizeof(a));
+    phu_printf("Phu check so phan tu=%d\r\n\r\n", sizeof(a)/sizeof(int));
 
   }
   /* USER CODE END 3 */
