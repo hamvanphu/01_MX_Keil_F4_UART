@@ -43,11 +43,13 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t rx_data = 0;
-uint8_t flag_Uart_Comm = 0;
-uint8_t rx_frame[COMM_FRAME_MAX];
-uint8_t rx_index = 0;
-uint8_t string_compare[COMM_FRAME_MAX]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; // temp
+uint8_t rx_data = 0; // single data of UART communicate
+bool flag_Uart_Comm = 0; // Is in communicate UART or not?
+bool flag_Uart_Comm_Is_Done = 0; // Is it end of communicate or not?
+bool flag_Is_EnableToCalChecksum = 0; // Is enable to calculate checksum or not?
+uint8_t rx_frame[COMM_FRAME_MAX]; // Buffer to communicate UART, 10 elements
+uint8_t rx_index = 0; // Index of RX buffer: [0:9]
+uint8_t string_compare[COMM_FRAME_MAX]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x07}; // temp
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,21 +77,26 @@ void phu_printf(char *format,...)
   va_end(args);
 }
 
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+  //Empty
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if(huart == &huart1)
   {
     HAL_UART_Receive_IT(&huart1, &rx_data, 1);// Register to recieve data at the next interupt time
+    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12); // Blink LED4 - GREEN
+
     if(rx_data == COMM_CODE_START)
     {
       if(rx_index == 0)
       {
         flag_Uart_Comm = 1; //start communication
-				memset(rx_frame, 0x00, COMM_FRAME_MAX*(sizeof(rx_frame)/sizeof(uint8_t))); // Clear RX buffer
-      }
-      else
-      {
-        // return; //early return if the first data is not as discuss: 0x2A
+				flag_Uart_Comm_Is_Done = 0;
+        flag_Is_EnableToCalChecksum = 0;
+				memset(rx_frame, 0x00, sizeof(rx_frame)); // Clear RX buffer
       }
     }
 
@@ -102,11 +109,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       {
         rx_index = 0;
         flag_Uart_Comm = 0;
+        flag_Uart_Comm_Is_Done = 1; // indicate that UART communicate has done
+        flag_Is_EnableToCalChecksum = 1; // Enable calculate checksum
       }
-    }
-    else
-    {
-      return;
     }
   }
 }
@@ -133,17 +138,61 @@ static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferL
   return 0;
 }
 
+/**
+  * @brief  Calculate checksum
+  * @param  pBuffer: buffers to be calculated checksum.
+  * @param  BufferLength: buffer's length
+  * @retval : checksum
+  */
+uint8_t Cal_Checksum(uint8_t *pBuffer, uint8_t u8_length)
+{
+  uint8_t buffer_index = 0;
+  uint8_t checksum = 0x00;
+  for(buffer_index = 0; buffer_index < u8_length; buffer_index++)
+  {
+    checksum = checksum + pBuffer[buffer_index];
+  }
+	// phu_printf("Cal_Checksum checksum =%2x, rx_frame[COMM_FRAME_MAX - 1] = %2x\r\n", checksum, rx_frame[COMM_FRAME_MAX - 1]);
+  return checksum;
+}
+
+bool Is_Enable_Led_Control_Handler(void)
+{
+  //Data process
+  uint8_t _checksum = 0x00;
+	bool isEnableControlLed = DISABLE;
+
+  if(flag_Is_EnableToCalChecksum == 1)
+  {
+    flag_Is_EnableToCalChecksum = 0;
+    _checksum = Cal_Checksum(rx_frame, COMM_FRAME_MAX - 1);
+    if((_checksum == rx_frame[COMM_FRAME_MAX - 1]))
+    {
+      isEnableControlLed = ENABLE;
+    }
+    else
+    {
+      phu_printf("Checksum Error... PLease calculate again or check checksum byte of TX device\r\n");
+      isEnableControlLed = DISABLE;
+    }
+  }
+  return isEnableControlLed;
+}
+
 void Led_Control_Handler(void)
 {
-  if(Buffercmp(rx_frame, string_compare, COMM_FRAME_MAX) == 0)
+  /* Both buffers are same, No need to include checksum byte because it was checked at Is_Enable_Led_Control_Handler*/
+  if(Buffercmp(rx_frame, string_compare, COMM_FRAME_MAX - 1) == 0) 
   {
     //Led application turn-on here
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_SET);
+    phu_printf("Led application turn-on here\r\n");
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET); // Turn LED6 - BLUE on
   }
   else
   {
     //Led application turn-off here
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+    phu_printf("Led application turn-off here\r\n");
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET); // Turn LED6 - BLUE off
   }
 }
 
@@ -192,14 +241,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		// phu_printf("Phu check print by using UART2 PA2_TX - PA3_RX STM32F411 Discovery Board\r\n");
-		// HAL_Delay(1000);
-    Led_Control_Handler();
-    HAL_Delay(1000);
-    phu_printf("Phu check sizeof(rx_frame)=%d\r\n", sizeof(rx_frame));
-    phu_printf("Phu check so phan tu =%d\r\n", sizeof(rx_frame)/sizeof(uint8_t));
-    phu_printf("Phu check sizeof(a)=%d\r\n", sizeof(a));
-    phu_printf("Phu check so phan tu=%d\r\n\r\n", sizeof(a)/sizeof(int));
-
+    if(Is_Enable_Led_Control_Handler())
+    {
+      Led_Control_Handler();
+    }
+		HAL_Delay(1);
   }
   /* USER CODE END 3 */
 }

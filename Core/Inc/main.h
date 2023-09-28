@@ -35,6 +35,7 @@ extern "C" {
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -65,6 +66,12 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define COMM_FRAME_MAX        10
 #define COMM_CODE_START       0x2A // '*' character
+
+#define FALSE                 0
+#define TRUE                  1
+
+#define DISABLE               0
+#define ENABLE                1
 
 /* USER CODE END Private defines */
 
