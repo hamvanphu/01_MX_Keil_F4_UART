@@ -90,7 +90,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   if(huart == &huart1)
   {
     HAL_UART_Receive_IT(&huart1, &rx_data, 1);// Register to recieve data at the next interupt time
-    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12); // Blink LED4 - GREEN
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET); // Turn LED5 - RED on
 
     if(rx_data == COMM_CODE_START)
     {
@@ -116,6 +116,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         flag_Is_EnableToCalChecksum = 1; // Enable calculate checksum
       }
     }
+  }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if(htim == &htim1)
+  {
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET); // Turn LED5 - RED off
   }
 }
 
@@ -234,6 +242,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+  HAL_TIM_Base_Start_IT(&htim1);
 
   /* USER CODE END 2 */
 
