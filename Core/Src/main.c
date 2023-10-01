@@ -30,6 +30,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define printf          phu_printf
 
 /* USER CODE END PD */
 
@@ -166,7 +167,7 @@ uint8_t Cal_Checksum(uint8_t *pBuffer, uint8_t u8_length)
   {
     checksum = checksum + pBuffer[buffer_index];
   }
-	// phu_printf("Cal_Checksum checksum =%2x, rx_frame[COMM_FRAME_MAX - 1] = %2x\r\n", checksum, rx_frame[COMM_FRAME_MAX - 1]);
+	// printf("Cal_Checksum checksum =%2x, rx_frame[COMM_FRAME_MAX - 1] = %2x\r\n", checksum, rx_frame[COMM_FRAME_MAX - 1]);
   return checksum;
 }
 
@@ -186,7 +187,7 @@ bool Is_Enable_Led_Control_Handler(void)
     }
     else
     {
-      phu_printf("Checksum Error... PLease calculate again or check checksum byte of TX device\r\n");
+      printf("Checksum Error... PLease calculate again or check checksum byte of TX device\r\n");
       isEnableControlLed = DISABLE;
     }
   }
@@ -199,13 +200,13 @@ void Led_Control_Handler(void)
   if(Buffercmp(rx_frame, string_compare, COMM_FRAME_MAX - 1) == 0) 
   {
     //Led application turn-on here
-    phu_printf("Led application turn-on here\r\n");
+    printf("Led application turn-on here\r\n");
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET); // Turn LED6 - BLUE on
   }
   else
   {
     //Led application turn-off here
-    phu_printf("Led application turn-off here\r\n");
+    printf("Led application turn-off here\r\n");
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET); // Turn LED6 - BLUE off
   }
 }
