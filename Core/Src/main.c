@@ -52,6 +52,7 @@ bool flag_Is_EnableToCalChecksum = 0; // Is enable to calculate checksum or not?
 uint8_t rx_frame[COMM_FRAME_MAX]; // Buffer to communicate UART, 10 elements
 uint8_t rx_index = 0; // Index of RX buffer: [0:9]
 uint8_t string_compare[COMM_FRAME_MAX]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x07}; // temp
+uint32_t desiredPeriod = (100*10 - 1); // Global variable to hold the desired period -> 100 is 100ms
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,22 +128,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET); // Turn LED5 - RED off
     HAL_TIM_Base_Stop_IT(&htim1);
   }
-}
-
-/**
-  * @brief  Update the Timer1 period.
-  * @param  newPeriod: Unit ms -> ex. 100, 500, 1000. (newPeriod*10 - 1) should be less than 65,535
-  * @retval Hal status
-  */
-HAL_StatusTypeDef updateTimer1Period(uint32_t timerMs) {
-  uint32_t newPeriod = (timerMs*10) - 1;
-  if(newPeriod <= 0xFFFF)
-  {
-    htim1.Init.Period = (newPeriod*10) - 1;
-    HAL_TIM_Base_Init(&htim1);
-    return HAL_OK;
-  }
-  return HAL_ERROR; // Can not re-configure TIM1's period
 }
 
 /**
@@ -260,7 +245,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
-  updateTimer1Period(100); // Re-configure TIM1 run as 100ms. Separate code by built-in CubeMx
+  __HAL_TIM_SET_AUTORELOAD(&htim1, desiredPeriod); // Re-configure TIM1 run as 100ms. Separate code by built-in CubeMx
 
   /* USER CODE END 2 */
 
