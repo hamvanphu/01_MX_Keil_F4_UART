@@ -91,6 +91,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   {
     HAL_UART_Receive_IT(&huart1, &rx_data, 1);// Register to recieve data at the next interupt time
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET); // Turn LED5 - RED on
+    HAL_TIM_Base_Start_IT(&htim1);
 
     if(rx_data == COMM_CODE_START)
     {
@@ -124,6 +125,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim == &htim1)
   {
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET); // Turn LED5 - RED off
+    HAL_TIM_Base_Stop_IT(&htim1);
   }
 }
 
@@ -242,7 +244,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
-  HAL_TIM_Base_Start_IT(&htim1);
+  // HAL_TIM_Base_Start_IT(&htim1);
 
   /* USER CODE END 2 */
 
