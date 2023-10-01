@@ -130,6 +130,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
+  * @brief  Update the Timer1 period.
+  * @param  newPeriod: Unit ms -> ex. 100, 500, 1000. (newPeriod*10 - 1) should be less than 65,535
+  * @retval Hal status
+  */
+HAL_StatusTypeDef updateTimer1Period(uint32_t timerMs) {
+  uint32_t newPeriod = (timerMs*10) - 1;
+  if(newPeriod <= 0xFFFF)
+  {
+    htim1.Init.Period = (newPeriod*10) - 1;
+    HAL_TIM_Base_Init(&htim1);
+    return HAL_OK;
+  }
+  return HAL_ERROR; // Can not re-configure TIM1's period
+}
+
+/**
   * @brief  Compares two buffers.
   * @param  pBuffer1, pBuffer2: buffers to be compared.
   * @param  BufferLength: buffer's length
@@ -244,7 +260,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
-  // HAL_TIM_Base_Start_IT(&htim1);
+  updateTimer1Period(100); // Re-configure TIM1 run as 100ms. Separate code by built-in CubeMx
 
   /* USER CODE END 2 */
 
