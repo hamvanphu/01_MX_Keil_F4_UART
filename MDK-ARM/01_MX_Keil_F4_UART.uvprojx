@@ -410,6 +410,11 @@
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f4xx_hal_msp.c</FilePath>
             </File>
+            <File>
+              <FileName>My_Lib_BSP_STM32F411.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\My_Lib_BSP_STM32F411.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
