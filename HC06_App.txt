@@ -1,0 +1,16 @@
+*******************************
+***  STM & HC-06            ***
+***  Rx (PA10) - Tx         ***
+***  Tx (PA9)  - Rx         ***
+***  GND - GND              ***
+***  VCC - VCC ( 3.3V )		***
+*******************************
+
+Smartphone: Install "Serial Bluetooth Terminal" or any Bluetooth app
+- Pair HC-06
+- Open app -> find HC-06 -> connect
+- Setup button
+	+. M1 -> 2A 01 11 22 33 44 55 66 77 07 (Hex) -> Turn On LED6 (Blue) PD15
+	+. M2 -> 2A 00 11 22 33 44 55 66 77 05 (Hex) -> Error
+	+. M3 -> 2A 00 11 22 33 44 55 66 77 06 (Hex) -> Turn Off LED6 (Blue) PD15
+	

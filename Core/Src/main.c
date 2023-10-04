@@ -85,6 +85,12 @@ void phu_printf(char *format,...)
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   //Empty
+  if(huart == &huart1)
+  {
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET); // Turn LED3 - GREEN on
+    HAL_TIM_Base_Start_IT(&htim1);
+  }
+
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -127,6 +133,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim == &htim1)
   {
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET); // Turn LED5 - RED off
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET); // Turn LED3 - Green off
     HAL_TIM_Base_Stop_IT(&htim1);
   }
 }
