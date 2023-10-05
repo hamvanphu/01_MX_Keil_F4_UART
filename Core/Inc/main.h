@@ -37,6 +37,8 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
+#include "My_Lib_BSP_STM32F411.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

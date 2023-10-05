@@ -87,7 +87,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   //Empty
   if(huart == &huart1)
   {
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET); // Turn LED3 - GREEN on
+    BSP_LED_On(LED3); // Turn LED3 - GREEN on
     HAL_TIM_Base_Start_IT(&htim1);
   }
 
@@ -98,7 +98,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   if(huart == &huart1)
   {
     HAL_UART_Receive_IT(&huart1, &rx_data, 1);// Register to recieve data at the next interupt time
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET); // Turn LED5 - RED on
+    BSP_LED_On(LED5); // Turn LED5 - RED on
     HAL_TIM_Base_Start_IT(&htim1);
 
     if(rx_data == COMM_CODE_START)
@@ -132,8 +132,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if(htim == &htim1)
   {
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET); // Turn LED5 - RED off
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET); // Turn LED3 - Green off
+    BSP_LED_Off(LED5); // Turn LED5 - RED off
+    BSP_LED_Off(LED3); // Turn LED3 - Green off
     HAL_TIM_Base_Stop_IT(&htim1);
   }
 }
@@ -208,13 +208,13 @@ void Led_Control_Handler(void)
   {
     //Led application turn-on here
     printf("Led application turn-on here\r\n");
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET); // Turn LED6 - BLUE on
+    BSP_LED_On(LED6); // Turn LED6 - BLUE on
   }
   else
   {
     //Led application turn-off here
     printf("Led application turn-off here\r\n");
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET); // Turn LED6 - BLUE off
+    BSP_LED_Off(LED6); // Turn LED6 - BLUE off
   }
 }
 
