@@ -10,7 +10,7 @@ const uint16_t GPIO_PIN[LEDn] = {LED4_PIN,
                                  LED5_PIN,
                                  LED6_PIN};
 
-GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {KEY_BUTTON_GPIO_PORT}; 
+GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {KEY_BUTTON_GPIO_PORT};  
 const uint16_t BUTTON_PIN[BUTTONn] = {KEY_BUTTON_PIN};
 const uint8_t BUTTON_IRQn[BUTTONn] = {KEY_BUTTON_EXTI_IRQn};
 

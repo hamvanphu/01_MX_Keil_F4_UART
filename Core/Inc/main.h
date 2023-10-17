@@ -38,6 +38,7 @@ extern "C" {
 #include <stdbool.h>
 
 #include "My_Lib_BSP_STM32F411.h"
+#include "HC_SR04.h"
 
 /* USER CODE END Includes */
 
@@ -64,6 +65,11 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SR04_ECHO_Pin GPIO_PIN_1
+#define SR04_ECHO_GPIO_Port GPIOA
+#define SR04_ECHO_EXTI_IRQn EXTI1_IRQn
+#define SR04_TRIGER_Pin GPIO_PIN_4
+#define SR04_TRIGER_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 #define COMM_FRAME_MAX        10
