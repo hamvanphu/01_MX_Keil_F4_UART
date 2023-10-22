@@ -55,6 +55,7 @@ uint8_t rx_frame[COMM_FRAME_MAX]; // Buffer to communicate UART, 10 elements
 uint8_t rx_index = 0; // Index of RX buffer: [0:9]
 uint8_t string_compare[COMM_FRAME_MAX]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x07}; // temp
 uint32_t desiredPeriod = (100*10 - 1); // Global variable to hold the desired period -> 100 is 100ms
+volatile uint32_t delayCounter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -137,6 +138,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     BSP_LED_Off(LED5); // Turn LED5 - RED off
     BSP_LED_Off(LED3); // Turn LED3 - Green off
     HAL_TIM_Base_Stop_IT(&htim1);
+  }
+  else if (htim == &htim4)
+  {
+    if (delayCounter > 0)
+    {
+      delayCounter--;
+    }
   }
 }
 
@@ -227,6 +235,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     HCSR04_Callback();
   }
 }
+void delay_us(uint16_t delay);
 
 /* USER CODE END 0 */
 

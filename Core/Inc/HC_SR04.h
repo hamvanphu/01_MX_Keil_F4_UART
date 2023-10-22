@@ -17,5 +17,5 @@ typedef enum
 void HCSR04_Trigger(void);
 void HCSR04_Callback(void);
 void HCSR04_Handler(void);
-
+float HCSR04_ReadDistance(void);
 #endif /*__HC_SR04_H*/
