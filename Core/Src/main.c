@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "My_Lib_Servo.h"
+#include "DS3231.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,6 +42,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
@@ -59,6 +63,9 @@ uint8_t rx_index = 0; // Index of RX buffer: [0:9]
 uint8_t string_compare[COMM_FRAME_MAX]={0x2A, 0x01, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x07}; // temp
 uint32_t desiredPeriod = (100*10 - 1); // Global variable to hold the desired period -> 100 is 100ms
 volatile uint32_t delayCounter = 0;
+
+uint8_t h,m,s,dd,mm,yy, dayofweek;
+char *arr_day[]={"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,6 +77,8 @@ static void MX_TIM1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM9_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -241,6 +250,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
+float temp = 0;
 void delay_us(uint16_t delay);
 
 /* USER CODE END 0 */
@@ -279,6 +289,8 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM3_Init();
   MX_TIM9_Init();
+  MX_I2C1_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart1, &rx_data, 1);
   __HAL_TIM_SET_AUTORELOAD(&htim1, desiredPeriod); // Re-configure TIM1 run as 100ms. Separate code by built-in CubeMx
@@ -286,6 +298,10 @@ int main(void)
 
   servo_init(&sv1, &htim9, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_2);
+
+  rtc_init(&hi2c1);
+  rtc_write_time(10,55,55);
+  rtc_write_date(25,10,23);
 
   /* USER CODE END 2 */
 
@@ -301,6 +317,10 @@ int main(void)
     {
       Led_Control_Handler();
     }
+    // rtc_read_time(&h,&m,&s);
+    // rtc_read_date(&dd, &mm, &yy);
+    // dayofweek = rtc_get_day_of_week(dd, mm, yy);
+    // temp = rtc_read_temp();
 		HAL_Delay(1);
   }
   /* USER CODE END 3 */
@@ -349,6 +369,74 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
 }
 
 /**
@@ -634,6 +722,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
