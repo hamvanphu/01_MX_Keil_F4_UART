@@ -431,14 +431,9 @@
               <FilePath>..\Core\Src\DS3231.c</FilePath>
             </File>
             <File>
-              <FileName>LiquidCrystal_I2C.c</FileName>
+              <FileName>My_Lib_Timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Core\Src\LiquidCrystal_I2C.c</FilePath>
-            </File>
-            <File>
-              <FileName>CLCD_I2C.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\CLCD_I2C.c</FilePath>
+              <FilePath>..\Core\Src\My_Lib_Timer.c</FilePath>
             </File>
           </Files>
         </Group>
